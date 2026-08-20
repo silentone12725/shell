@@ -44,6 +44,7 @@
         };
         caelestia-cli = inputs.caelestia-cli.packages.${pkgs.stdenv.hostPlatform.system}.default;
       };
+      bbm-daemon = pkgs.callPackage ./nix/bbm.nix {};
       with-cli = caelestia-shell.override {withCli = true;};
       debug = caelestia-shell.override {debug = true;};
       default = caelestia-shell;
