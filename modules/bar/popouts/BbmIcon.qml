@@ -13,6 +13,7 @@ Item {
 
     Image {
         id: img
+
         anchors.fill: parent
         source: iconItem.url
         sourceSize: Qt.size(iconItem.size, iconItem.size)
@@ -40,6 +41,7 @@ Item {
 
     ImageAnalyser {
         id: analyser
+
         sourceItem: img
     }
 }

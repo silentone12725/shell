@@ -133,6 +133,26 @@ Singleton {
         }).running = true;
     }
 
+    function _fetchDevice(address) {
+        fetchDeviceComp.createObject(root, {
+            addr: address
+        }).running = true;
+    }
+
+    function _init() {
+        if (!monitor.running)
+            monitor.running = true;
+        // Start listProc on the next tick so monitor connects to D-Bus before
+        // we enumerate devices — prevents signals emitted between list response
+        // and monitor startup from being silently dropped.
+        Qt.callLater(() => {
+            if (!listProc.running)
+                listProc.running = true;
+            if (!iconPathProc.running)
+                iconPathProc.running = true;
+        });
+    }
+
     // ── GVariant text parsers ─────────────────────────────────────────────────
 
     function _parseAddressList(text) {
@@ -202,13 +222,17 @@ Singleton {
         return result;
     }
 
+    Component.onCompleted: _init()
+
     // ── Process components ────────────────────────────────────────────────────
 
     // Dynamic: one instance per GetDeviceData call, self-destroys on exit.
     Component {
         id: fetchDeviceComp
+
         Process {
             property string addr: ""
+
             command: ["gdbus", "call", "--session", "--dest", root._dest, "--object-path", root._path, "--method", `${root._iface}.GetDeviceData`, `'${addr}'`]
             stdout: StdioCollector {
                 onStreamFinished: {
@@ -227,6 +251,7 @@ Singleton {
     // Dynamic: fire-and-forget SendUIAction, self-destroys.
     Component {
         id: sendActionComp
+
         Process {
             onExited: destroy()
         }
@@ -235,6 +260,7 @@ Singleton {
     // One-shot: fetch the icon base path from the daemon (called once on connect).
     Process {
         id: iconPathProc
+
         running: false
         command: ["gdbus", "call", "--session", "--dest", root._dest, "--object-path", root._path, "--method", `${root._iface}.GetIconPath`]
         stdout: StdioCollector {
@@ -251,6 +277,7 @@ Singleton {
 
     Process {
         id: monitor
+
         running: false
         // stdbuf -oL forces line-buffering: gdbus switches to block-buffered
         // stdout when piped (not a tty), so signals would silently queue until
@@ -282,6 +309,7 @@ Singleton {
     // Static: reused for each GetDevices check.
     Process {
         id: listProc
+
         running: false
         command: ["gdbus", "call", "--session", "--dest", root._dest, "--object-path", root._path, "--method", `${root._iface}.GetDevices`]
         stdout: StdioCollector {
@@ -300,34 +328,11 @@ Singleton {
         }
     }
 
-    // ── Internal helpers ──────────────────────────────────────────────────────
-
-    function _fetchDevice(address) {
-        fetchDeviceComp.createObject(root, {
-            addr: address
-        }).running = true;
-    }
-
-    function _init() {
-        if (!monitor.running)
-            monitor.running = true;
-        // Start listProc on the next tick so monitor connects to D-Bus before
-        // we enumerate devices — prevents signals emitted between list response
-        // and monitor startup from being silently dropped.
-        Qt.callLater(() => {
-            if (!listProc.running)
-                listProc.running = true;
-            if (!iconPathProc.running)
-                iconPathProc.running = true;
-        });
-    }
-
     Timer {
         id: retryTimer
+
         interval: root._retryIntervalMs
         repeat: false
         onTriggered: root._init()
     }
-
-    Component.onCompleted: _init()
 }

@@ -440,7 +440,9 @@ PageBase {
 
         ColorDialog {
             id: colorDialog
+
             property int bucketIndex: 0
+
             title: qsTr("Choose battery colour")
             onAccepted: {
                 if (!GlobalConfig.services)

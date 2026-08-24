@@ -23,6 +23,7 @@ ColumnLayout {
     readonly property bool showBatteryText: Boolean(GlobalConfig.services && GlobalConfig.services.bluetoothBatteryText)
     readonly property bool showBatteryRing: Boolean(GlobalConfig.services && GlobalConfig.services.bluetoothBatteryRing)
     readonly property bool swapIconText: Boolean(GlobalConfig.services && GlobalConfig.services.bluetoothBatterySwapIconText)
+
     function batteryColorForLevel(levelPercent) {
         const level = Math.max(0, Math.min(100, Number(levelPercent) || 0));
         const error = Colours.palette.m3error;
@@ -185,6 +186,7 @@ ColumnLayout {
 
                     StyledText {
                         id: deviceName
+
                         anchors {
                             left: parent.left
                             right: parent.right

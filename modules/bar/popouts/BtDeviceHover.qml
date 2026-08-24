@@ -84,6 +84,7 @@ StyledRect {
 
                     BbmIcon {
                         readonly property string url_: BbmService.deviceIconUrl(deviceSection.address, deviceSection.modelData?.icon ?? "")
+
                         url: url_
                         visible: url_.length > 0
                         size: 16
@@ -182,6 +183,7 @@ StyledRect {
                 Rectangle {
                     readonly property bool hasBatteries: (GlobalConfig.services?.bluetoothHoverShowBatteries ?? true) && (deviceSection.bbmData !== null || deviceSection.modelData?.batteryAvailable === true)
                     readonly property bool hasControls: (GlobalConfig.services?.bluetoothHoverShowControls ?? true) && deviceSection.bbmData !== null && ((deviceSection.bbmData?.Toggle1Visible ?? false) || (deviceSection.bbmData?.Toggle2Visible ?? false))
+
                     visible: hasBatteries && hasControls
                     Layout.fillWidth: true
                     height: 1
@@ -247,6 +249,7 @@ StyledRect {
 
                                     BbmIcon {
                                         id: pillIcon
+
                                         anchors.centerIn: parent
                                         url: pill.iconUrl
                                         visible: url.length > 0
@@ -345,6 +348,7 @@ StyledRect {
 
                                     StyledText {
                                         id: levelLabel
+
                                         anchors.centerIn: parent
                                         text: levelPill.modelData.name
                                         color: levelPill.modelData.active ? Colours.palette.m3onSecondary : Colours.palette.m3onSurface

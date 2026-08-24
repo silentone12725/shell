@@ -1,28 +1,8 @@
 import QtQuick
 import QtTest
 
-// Points at the real BbmIcon.qml via the -import path supplied on the CLI.
-// Stubs for qs.components.effects are provided from the stubs/ directory.
-
 TestCase {
     id: root
-    name: "BbmIcon"
-
-    // ── Component under test ─────────────────────────────────────────────────
-    // BbmIcon.qml required properties:
-    //   required property string url
-    //   required property color  colour
-    //   property int size: 18  (optional, default 18)
-
-    Component {
-        id: bbmIconComp
-        BbmIcon {
-            url: ""
-            colour: "white"
-        }
-    }
-
-    // ── Tests ────────────────────────────────────────────────────────────────
 
     function test_instantiates() {
         var obj = createTemporaryObject(bbmIconComp, root);
@@ -61,5 +41,16 @@ TestCase {
         var obj = createTemporaryObject(bbmIconComp, root);
         obj.url = "";
         verify(obj !== null);
+    }
+
+    name: "BbmIcon"
+
+    Component {
+        id: bbmIconComp
+
+        BbmIcon {
+            url: ""
+            colour: "white"
+        }
     }
 }

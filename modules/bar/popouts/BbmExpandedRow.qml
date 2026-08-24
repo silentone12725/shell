@@ -62,6 +62,7 @@ StyledRect {
 
             Row {
                 id: batteryRow
+
                 anchors.horizontalCenter: parent.horizontalCenter
                 spacing: Tokens.spacing.large
 
@@ -178,6 +179,7 @@ StyledRect {
 
                             BbmIcon {
                                 id: pillIcon
+
                                 anchors.centerIn: parent
                                 url: BbmService.toggleIconUrl(pill.modelData.icon)
                                 visible: url.length > 0
@@ -270,6 +272,7 @@ StyledRect {
 
                             StyledText {
                                 id: levelLabel
+
                                 anchors.centerIn: parent
                                 text: levelPill.modelData.name
                                 color: levelPill.modelData.active ? Colours.palette.m3onSecondary : Colours.palette.m3onSurface
