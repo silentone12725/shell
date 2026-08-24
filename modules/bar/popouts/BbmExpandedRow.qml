@@ -23,8 +23,10 @@ StyledRect {
         function lerp(a, b, t) {
             return Qt.rgba(a.r + (b.r - a.r) * t, a.g + (b.g - a.g) * t, a.b + (b.b - a.b) * t, 1);
         }
-        if (level <= 15) return error;
-        if (level <= 40) return lerp(error, tertiary, (level - 15) / 25);
+        if (level <= 15)
+            return error;
+        if (level <= 40)
+            return lerp(error, tertiary, (level - 15) / 25);
         return lerp(tertiary, primary, (level - 40) / 60);
     }
 
@@ -81,8 +83,7 @@ StyledRect {
                                 anchors.fill: parent
                                 value: circleDel.modelData.level / 100
                                 strokeWidth: 4
-                                fgColour: circleDel.modelData.charging ? Colours.palette.m3tertiary
-                                         : root.batteryColorForLevel(circleDel.modelData.level)
+                                fgColour: circleDel.modelData.charging ? Colours.palette.m3tertiary : root.batteryColorForLevel(circleDel.modelData.level)
                                 bgColour: Qt.alpha(Colours.palette.m3onSurface, 0.12)
                             }
 
@@ -91,14 +92,16 @@ StyledRect {
                                 url: BbmService.batteryIconUrl(circleDel.modelData.icon)
                                 visible: url.length > 0
                                 size: 22
-                                colour: circleDel.modelData.charging ? Colours.palette.m3tertiary
-                                       : root.batteryColorForLevel(circleDel.modelData.level)
+                                colour: circleDel.modelData.charging ? Colours.palette.m3tertiary : root.batteryColorForLevel(circleDel.modelData.level)
                             }
 
                             // Charging bolt badge at bottom of ring
                             MaterialIcon {
                                 visible: circleDel.modelData.charging
-                                anchors { bottom: parent.bottom; horizontalCenter: parent.horizontalCenter }
+                                anchors {
+                                    bottom: parent.bottom
+                                    horizontalCenter: parent.horizontalCenter
+                                }
                                 text: "bolt"
                                 color: Colours.palette.m3tertiary
                                 fontStyle: Tokens.font.icon.small
@@ -143,12 +146,12 @@ StyledRect {
 
                     Repeater {
                         model: toggleRow.modelData.buttons.map((name, i) => ({
-                            name,
-                            icon: (toggleRow.modelData.buttonIcons ?? [])[i] ?? "",
-                            active: toggleRow.modelData.state === (i + 1),
-                            widgetId: toggleRow.modelData.widgetId,
-                            index: i,
-                        }))
+                                    name,
+                                    icon: (toggleRow.modelData.buttonIcons ?? [])[i] ?? "",
+                                    active: toggleRow.modelData.state === (i + 1),
+                                    widgetId: toggleRow.modelData.widgetId,
+                                    index: i
+                                }))
 
                         delegate: StyledRect {
                             id: pill
@@ -159,12 +162,12 @@ StyledRect {
                             implicitWidth: pillIcon.size + Tokens.padding.medium * 2
 
                             radius: Tokens.rounding.medium
-                            color: pill.modelData.active
-                                ? Colours.palette.m3primary
-                                : Qt.alpha(Colours.palette.m3onSurface, 0.08)
+                            color: pill.modelData.active ? Colours.palette.m3primary : Qt.alpha(Colours.palette.m3onSurface, 0.08)
 
                             Behavior on color {
-                                Anim { type: Anim.DefaultEffects }
+                                Anim {
+                                    type: Anim.DefaultEffects
+                                }
                             }
 
                             StateLayer {
@@ -192,8 +195,7 @@ StyledRect {
         Item {
             id: ancLevelContainer
 
-            readonly property bool showing: (root.bbmData?.OptionsBoxVisible ?? 0) === 1
-                && (root.bbmData?.AncLevelButtons ?? []).length > 0
+            readonly property bool showing: (root.bbmData?.OptionsBoxVisible ?? 0) === 1 && (root.bbmData?.AncLevelButtons ?? []).length > 0
 
             Layout.fillWidth: true
             implicitHeight: showing ? ancLevelLayout.implicitHeight : 0
@@ -214,11 +216,15 @@ StyledRect {
                 transformOrigin: Item.Top
 
                 Behavior on opacity {
-                    Anim { type: Anim.StandardSmall }
+                    Anim {
+                        type: Anim.StandardSmall
+                    }
                 }
 
                 Behavior on scale {
-                    Anim { type: Anim.StandardSmall }
+                    Anim {
+                        type: Anim.StandardSmall
+                    }
                 }
 
                 StyledText {
@@ -234,10 +240,10 @@ StyledRect {
 
                     Repeater {
                         model: (root.bbmData?.AncLevelButtons ?? []).map((name, i) => ({
-                            name,
-                            active: (root.bbmData?.AncLevelState ?? 0) === (i + 1),
-                            index: i,
-                        }))
+                                    name,
+                                    active: (root.bbmData?.AncLevelState ?? 0) === (i + 1),
+                                    index: i
+                                }))
 
                         delegate: StyledRect {
                             id: levelPill
@@ -248,12 +254,12 @@ StyledRect {
                             implicitWidth: levelLabel.implicitWidth + Tokens.padding.medium * 2
 
                             radius: Tokens.rounding.medium
-                            color: levelPill.modelData.active
-                                ? Colours.palette.m3secondary
-                                : Qt.alpha(Colours.palette.m3onSurface, 0.08)
+                            color: levelPill.modelData.active ? Colours.palette.m3secondary : Qt.alpha(Colours.palette.m3onSurface, 0.08)
 
                             Behavior on color {
-                                Anim { type: Anim.DefaultEffects }
+                                Anim {
+                                    type: Anim.DefaultEffects
+                                }
                             }
 
                             StateLayer {
@@ -275,5 +281,4 @@ StyledRect {
             }
         }
     }
-
 }

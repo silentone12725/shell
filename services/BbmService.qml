@@ -52,21 +52,11 @@ Singleton {
             'phone-apple-iphone-symbolic': 'phone',
             'phone-apple-iphone': 'phone',
             'phone-google-nexus-one': 'phone',
-            'phone-samsung-galaxy-s': 'phone',
+            'phone-samsung-galaxy-s': 'phone'
         };
-        if (overrideMap[bluezIcon]) return overrideMap[bluezIcon];
-        const direct = [
-            'audio-card', 'audio-speakers', 'audio-speakers2', 'audio-speakers3',
-            'audio-headphones', 'audio-headset', 'headphone1',
-            'earbuds', 'earbuds-wingtip', 'earbuds-wingtip2', 'earbuds-neckband',
-            'earbuds-stem', 'earbuds-stem2', 'earbuds-stem3', 'earbuds-bean',
-            'input-microphone', 'input-gaming', 'input-gaming2', 'input-gaming3',
-            'input-keyboard', 'input-keyboard2', 'input-split-keyboard',
-            'input-mouse', 'input-tablet', 'touchpad',
-            'phone', 'multimedia-player', 'pda', 'camera-photo', 'camera-video',
-            'computer', 'video-display', 'printer', 'scanner', 'modem', 'network-wireless',
-            'wearable', 'wearable2',
-        ];
+        if (overrideMap[bluezIcon])
+            return overrideMap[bluezIcon];
+        const direct = ['audio-card', 'audio-speakers', 'audio-speakers2', 'audio-speakers3', 'audio-headphones', 'audio-headset', 'headphone1', 'earbuds', 'earbuds-wingtip', 'earbuds-wingtip2', 'earbuds-neckband', 'earbuds-stem', 'earbuds-stem2', 'earbuds-stem3', 'earbuds-bean', 'input-microphone', 'input-gaming', 'input-gaming2', 'input-gaming3', 'input-keyboard', 'input-keyboard2', 'input-split-keyboard', 'input-mouse', 'input-tablet', 'touchpad', 'phone', 'multimedia-player', 'pda', 'camera-photo', 'camera-video', 'computer', 'video-display', 'printer', 'scanner', 'modem', 'network-wireless', 'wearable', 'wearable2',];
         return direct.includes(bluezIcon) ? bluezIcon : null;
     }
 
@@ -93,27 +83,53 @@ Singleton {
     }
 
     function batteriesFor(bbmData) {
-        if (!bbmData) return [];
+        if (!bbmData)
+            return [];
         return [
-            {icon: bbmData.Battery1Icon ?? "", level: bbmData.Battery1Level ?? 0, charging: (bbmData.Battery1Status ?? "") === root.STATUS_CHARGING},
-            {icon: bbmData.Battery2Icon ?? "", level: bbmData.Battery2Level ?? 0, charging: (bbmData.Battery2Status ?? "") === root.STATUS_CHARGING},
-            {icon: bbmData.Battery3Icon ?? "", level: bbmData.Battery3Level ?? 0, charging: (bbmData.Battery3Status ?? "") === root.STATUS_CHARGING},
+            {
+                icon: bbmData.Battery1Icon ?? "",
+                level: bbmData.Battery1Level ?? 0,
+                charging: (bbmData.Battery1Status ?? "") === root.STATUS_CHARGING
+            },
+            {
+                icon: bbmData.Battery2Icon ?? "",
+                level: bbmData.Battery2Level ?? 0,
+                charging: (bbmData.Battery2Status ?? "") === root.STATUS_CHARGING
+            },
+            {
+                icon: bbmData.Battery3Icon ?? "",
+                level: bbmData.Battery3Level ?? 0,
+                charging: (bbmData.Battery3Status ?? "") === root.STATUS_CHARGING
+            },
         ].filter(b => b.level > 0);
     }
 
     function togglesFor(bbmData) {
-        if (!bbmData) return [];
+        if (!bbmData)
+            return [];
         return [
-            {title: bbmData.Toggle1Title ?? "", buttons: bbmData.Toggle1Buttons ?? [], buttonIcons: bbmData.Toggle1ButtonIcons ?? [], state: bbmData.Toggle1State ?? 0, visible: bbmData.Toggle1Visible ?? false, widgetId: "toggle1State"},
-            {title: bbmData.Toggle2Title ?? "", buttons: bbmData.Toggle2Buttons ?? [], buttonIcons: bbmData.Toggle2ButtonIcons ?? [], state: bbmData.Toggle2State ?? 0, visible: bbmData.Toggle2Visible ?? false, widgetId: "toggle2State"},
+            {
+                title: bbmData.Toggle1Title ?? "",
+                buttons: bbmData.Toggle1Buttons ?? [],
+                buttonIcons: bbmData.Toggle1ButtonIcons ?? [],
+                state: bbmData.Toggle1State ?? 0,
+                visible: bbmData.Toggle1Visible ?? false,
+                widgetId: "toggle1State"
+            },
+            {
+                title: bbmData.Toggle2Title ?? "",
+                buttons: bbmData.Toggle2Buttons ?? [],
+                buttonIcons: bbmData.Toggle2ButtonIcons ?? [],
+                state: bbmData.Toggle2State ?? 0,
+                visible: bbmData.Toggle2Visible ?? false,
+                widgetId: "toggle2State"
+            },
         ].filter(t => t.visible && t.buttons.length > 0);
     }
 
     function sendUIAction(address, widgetId, value) {
         sendActionComp.createObject(root, {
-            command: ["gdbus", "call", "--session", "--dest", root._dest,
-                "--object-path", root._path, "--method", `${root._iface}.SendUIAction`,
-                `'${address}'`, `'${widgetId}'`, String(value)]
+            command: ["gdbus", "call", "--session", "--dest", root._dest, "--object-path", root._path, "--method", `${root._iface}.SendUIAction`, `'${address}'`, `'${widgetId}'`, String(value)]
         }).running = true;
     }
 
@@ -171,9 +187,7 @@ Singleton {
                 result[key] = [];
             } else if (raw.startsWith('[')) {
                 const content = raw.slice(1, -1).trim();
-                result[key] = content
-                    ? content.split(/, (?=')/).map(item => item.replace(/^'|'$/g, ''))
-                    : [];
+                result[key] = content ? content.split(/, (?=')/).map(item => item.replace(/^'|'$/g, '')) : [];
             } else {
                 // GVariant type-annotated number: "int32 65", "uint32 3", "double 1.5", etc.
                 const typedNum = /^(?:byte|int16|uint16|int32|uint32|int64|uint64|double|handle) (-?\d+(?:\.\d+)?)$/.exec(raw);
@@ -195,9 +209,7 @@ Singleton {
         id: fetchDeviceComp
         Process {
             property string addr: ""
-            command: ["gdbus", "call", "--session", "--dest", root._dest,
-                "--object-path", root._path, "--method", `${root._iface}.GetDeviceData`,
-                `'${addr}'`]
+            command: ["gdbus", "call", "--session", "--dest", root._dest, "--object-path", root._path, "--method", `${root._iface}.GetDeviceData`, `'${addr}'`]
             stdout: StdioCollector {
                 onStreamFinished: {
                     const data = root._parseDeviceData(text);
@@ -224,8 +236,7 @@ Singleton {
     Process {
         id: iconPathProc
         running: false
-        command: ["gdbus", "call", "--session", "--dest", root._dest,
-            "--object-path", root._path, "--method", `${root._iface}.GetIconPath`]
+        command: ["gdbus", "call", "--session", "--dest", root._dest, "--object-path", root._path, "--method", `${root._iface}.GetIconPath`]
         stdout: StdioCollector {
             onStreamFinished: {
                 // Output format: ('/path/to/icons',)\n
@@ -244,8 +255,7 @@ Singleton {
         // stdbuf -oL forces line-buffering: gdbus switches to block-buffered
         // stdout when piped (not a tty), so signals would silently queue until
         // the 4-8KB buffer fills without this.
-        command: ["stdbuf", "-oL", "gdbus", "monitor", "--session", "--dest", root._dest,
-            "--object-path", root._path]
+        command: ["stdbuf", "-oL", "gdbus", "monitor", "--session", "--dest", root._dest, "--object-path", root._path]
         stdout: SplitParser {
             onRead: line => {
                 const ifaceEsc = root._iface.replace(/\./g, "\\.");
@@ -273,8 +283,7 @@ Singleton {
     Process {
         id: listProc
         running: false
-        command: ["gdbus", "call", "--session", "--dest", root._dest,
-            "--object-path", root._path, "--method", `${root._iface}.GetDevices`]
+        command: ["gdbus", "call", "--session", "--dest", root._dest, "--object-path", root._path, "--method", `${root._iface}.GetDevices`]
         stdout: StdioCollector {
             onStreamFinished: {
                 if (!text.trim().startsWith("("))
@@ -294,7 +303,9 @@ Singleton {
     // ── Internal helpers ──────────────────────────────────────────────────────
 
     function _fetchDevice(address) {
-        fetchDeviceComp.createObject(root, {addr: address}).running = true;
+        fetchDeviceComp.createObject(root, {
+            addr: address
+        }).running = true;
     }
 
     function _init() {

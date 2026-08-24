@@ -17,7 +17,7 @@ TestCase {
     Component {
         id: bbmIconComp
         BbmIcon {
-            url:    ""
+            url: ""
             colour: "white"
         }
     }
@@ -32,7 +32,7 @@ TestCase {
     function test_default_size_18() {
         var obj = createTemporaryObject(bbmIconComp, root);
         compare(obj.size, 18);
-        compare(obj.implicitWidth,  18);
+        compare(obj.implicitWidth, 18);
         compare(obj.implicitHeight, 18);
     }
 
@@ -40,7 +40,7 @@ TestCase {
         var obj = createTemporaryObject(bbmIconComp, root);
         obj.size = 32;
         compare(obj.size, 32);
-        compare(obj.implicitWidth,  32);
+        compare(obj.implicitWidth, 32);
         compare(obj.implicitHeight, 32);
     }
 

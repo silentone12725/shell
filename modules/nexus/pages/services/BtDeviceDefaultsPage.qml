@@ -34,8 +34,7 @@ PageBase {
 
             model: ScriptModel {
                 values: (Bluetooth.devices.values ?? []) // qmllint disable unresolved-type
-                    .filter(d => d.bonded)
-                    .sort((a, b) => (b.connected - a.connected) || a.name.localeCompare(b.name))
+                .filter(d => d.bonded).sort((a, b) => (b.connected - a.connected) || a.name.localeCompare(b.name))
             }
 
             delegate: ConnectedRect {
@@ -44,9 +43,7 @@ PageBase {
                 required property BluetoothDevice modelData // qmllint disable unresolved-type
                 required property int index
 
-                readonly property string bbmUrl: BbmService.deviceIconUrl(
-                    deviceRow.modelData.address,
-                    deviceRow.modelData.icon ?? "")
+                readonly property string bbmUrl: BbmService.deviceIconUrl(deviceRow.modelData.address, deviceRow.modelData.icon ?? "")
 
                 Layout.fillWidth: true
                 implicitHeight: rowContent.implicitHeight + Tokens.padding.medium * 2
@@ -90,9 +87,7 @@ PageBase {
 
                             anchors.centerIn: parent
                             // "bluetooth" used as size reference when BBM icon is active
-                            text: deviceRow.bbmUrl.length > 0
-                                ? "bluetooth"
-                                : Icons.getDeviceIcon(deviceRow.modelData.address, deviceRow.modelData.icon ?? "")
+                            text: deviceRow.bbmUrl.length > 0 ? "bluetooth" : Icons.getDeviceIcon(deviceRow.modelData.address, deviceRow.modelData.icon ?? "")
                             visible: deviceRow.bbmUrl.length === 0
                             color: Colours.palette.m3onSurfaceVariant
                             fontStyle: Tokens.font.icon.medium

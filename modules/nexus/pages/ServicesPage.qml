@@ -227,9 +227,7 @@ PageBase {
             menuItems: root.batteryIndicatorItems
             active: {
                 const mode = GlobalConfig.services ? GlobalConfig.services.bluetoothBatteryIndicatorType : undefined;
-                const idx = Number.isFinite(mode)
-                    ? root.batteryIndicatorValues.indexOf(mode)
-                    : 2;
+                const idx = Number.isFinite(mode) ? root.batteryIndicatorValues.indexOf(mode) : 2;
                 return root.batteryIndicatorItems[Math.max(0, Math.min(root.batteryIndicatorItems.length - 1, idx))];
             }
             onSelected: item => {
@@ -274,21 +272,24 @@ PageBase {
             text: qsTr("Show battery ring")
             subtext: qsTr("Display the circular battery indicator around connected devices")
             checked: Boolean(GlobalConfig.services && GlobalConfig.services.bluetoothBatteryRing)
-            onToggled: if (GlobalConfig.services) GlobalConfig.services.bluetoothBatteryRing = checked
+            onToggled: if (GlobalConfig.services)
+                GlobalConfig.services.bluetoothBatteryRing = checked
         }
 
         ToggleRow {
             text: qsTr("Open battery popup in quick settings")
             subtext: qsTr("Show the Bluetooth battery details in a nested popup instead of inline rows")
             checked: Boolean(GlobalConfig.services && GlobalConfig.services.bluetoothBatteryPopupInQuickSettings)
-            onToggled: if (GlobalConfig.services) GlobalConfig.services.bluetoothBatteryPopupInQuickSettings = checked
+            onToggled: if (GlobalConfig.services)
+                GlobalConfig.services.bluetoothBatteryPopupInQuickSettings = checked
         }
 
         ToggleRow {
             text: qsTr("Sort devices by recent use")
             subtext: qsTr("Keep connected or recently used devices at the top of the list")
             checked: Boolean(GlobalConfig.services && GlobalConfig.services.bluetoothBatterySortByHistory)
-            onToggled: if (GlobalConfig.services) GlobalConfig.services.bluetoothBatterySortByHistory = checked
+            onToggled: if (GlobalConfig.services)
+                GlobalConfig.services.bluetoothBatterySortByHistory = checked
         }
 
         SelectRow {
@@ -331,14 +332,16 @@ PageBase {
             text: qsTr("Use multi-indicator mode")
             subtext: qsTr("Show each device battery as a separate indicator when multiple devices are connected")
             checked: Boolean(GlobalConfig.services && GlobalConfig.services.bluetoothBatteryMultiIndicator)
-            onToggled: if (GlobalConfig.services) GlobalConfig.services.bluetoothBatteryMultiIndicator = checked
+            onToggled: if (GlobalConfig.services)
+                GlobalConfig.services.bluetoothBatteryMultiIndicator = checked
         }
 
         ToggleRow {
             text: qsTr("Use hover mode")
             subtext: qsTr("Only reveal the extended battery view when the pointer hovers over the indicator")
             checked: Boolean(GlobalConfig.services && GlobalConfig.services.bluetoothBatteryHoverMode)
-            onToggled: if (GlobalConfig.services) GlobalConfig.services.bluetoothBatteryHoverMode = checked
+            onToggled: if (GlobalConfig.services)
+                GlobalConfig.services.bluetoothBatteryHoverMode = checked
         }
 
         StepperRow {
@@ -358,28 +361,32 @@ PageBase {
             text: qsTr("Show battery tooltips")
             subtext: qsTr("Display the device battery and status when hovering over the Bluetooth icon")
             checked: Boolean(GlobalConfig.services && GlobalConfig.services.bluetoothBatteryTooltips)
-            onToggled: if (GlobalConfig.services) GlobalConfig.services.bluetoothBatteryTooltips = checked
+            onToggled: if (GlobalConfig.services)
+                GlobalConfig.services.bluetoothBatteryTooltips = checked
         }
 
         ToggleRow {
             text: qsTr("Use per-device defaults")
             subtext: qsTr("Let each Bluetooth device keep its own preferred battery display and behaviour")
             checked: Boolean(GlobalConfig.services && GlobalConfig.services.bluetoothBatteryPerDeviceDefaults)
-            onToggled: if (GlobalConfig.services) GlobalConfig.services.bluetoothBatteryPerDeviceDefaults = checked
+            onToggled: if (GlobalConfig.services)
+                GlobalConfig.services.bluetoothBatteryPerDeviceDefaults = checked
         }
 
         ToggleRow {
             text: qsTr("Enable UPower device support")
             subtext: qsTr("Include extra battery-aware devices that expose power data through UPower")
             checked: Boolean(GlobalConfig.services && GlobalConfig.services.bluetoothBatteryUpowerSupport)
-            onToggled: if (GlobalConfig.services) GlobalConfig.services.bluetoothBatteryUpowerSupport = checked
+            onToggled: if (GlobalConfig.services)
+                GlobalConfig.services.bluetoothBatteryUpowerSupport = checked
         }
 
         ToggleRow {
             text: qsTr("Use custom battery colours")
             subtext: qsTr("Apply a custom per-bucket battery palette instead of the default adaptive colours")
             checked: Boolean(GlobalConfig.services && GlobalConfig.services.bluetoothBatteryUseCustomColors)
-            onToggled: if (GlobalConfig.services) GlobalConfig.services.bluetoothBatteryUseCustomColors = checked
+            onToggled: if (GlobalConfig.services)
+                GlobalConfig.services.bluetoothBatteryUseCustomColors = checked
         }
 
         SelectRow {

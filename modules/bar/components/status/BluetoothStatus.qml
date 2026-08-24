@@ -33,12 +33,18 @@ Item {
             if (device.batteryAvailable !== undefined && device.batteryAvailable !== null) {
                 const pct = Number(device.battery) * 100;
                 if (Number.isFinite(pct))
-                    return { percentage: pct, available: true };
+                    return {
+                        percentage: pct,
+                        available: true
+                    };
             }
             const bbmEntry = BbmService.available ? BbmService.dataFor(device.address ?? "") : null;
             const bbmLevel = Number(bbmEntry?.ComputedLevel ?? NaN);
             if (Number.isFinite(bbmLevel))
-                return { percentage: bbmLevel, available: true };
+                return {
+                    percentage: bbmLevel,
+                    available: true
+                };
         }
         return null;
     }

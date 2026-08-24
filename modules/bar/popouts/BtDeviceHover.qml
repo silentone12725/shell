@@ -28,8 +28,10 @@ StyledRect {
         function lerp(a, b, t) {
             return Qt.rgba(a.r + (b.r - a.r) * t, a.g + (b.g - a.g) * t, a.b + (b.b - a.b) * t, 1);
         }
-        if (level <= 15) return error;
-        if (level <= 40) return lerp(error, tertiary, (level - 15) / 25);
+        if (level <= 15)
+            return error;
+        if (level <= 40)
+            return lerp(error, tertiary, (level - 15) / 25);
         return lerp(tertiary, primary, (level - 40) / 60);
     }
 
@@ -62,9 +64,7 @@ StyledRect {
                 required property BluetoothDevice modelData // qmllint disable unresolved-type
 
                 readonly property string address: deviceSection.modelData?.address ?? ""
-                readonly property var bbmData: BbmService.available
-                    ? BbmService.dataFor(deviceSection.address)
-                    : null
+                readonly property var bbmData: BbmService.available ? BbmService.dataFor(deviceSection.address) : null
 
                 Layout.fillWidth: true
                 spacing: Tokens.spacing.small
@@ -112,11 +112,13 @@ StyledRect {
 
                         Repeater {
                             model: ScriptModel {
-                                values: deviceSection.bbmData
-                                    ? BbmService.batteriesFor(deviceSection.bbmData)
-                                    : deviceSection.modelData?.batteryAvailable === true
-                                        ? [{icon: "", level: Math.round((deviceSection.modelData?.battery ?? 0) * 100), charging: false}]
-                                        : []
+                                values: deviceSection.bbmData ? BbmService.batteriesFor(deviceSection.bbmData) : deviceSection.modelData?.batteryAvailable === true ? [
+                                    {
+                                        icon: "",
+                                        level: Math.round((deviceSection.modelData?.battery ?? 0) * 100),
+                                        charging: false
+                                    }
+                                ] : []
                             }
 
                             ColumnLayout {
@@ -134,9 +136,7 @@ StyledRect {
                                         anchors.fill: parent
                                         value: circleDel.modelData.level / 100
                                         strokeWidth: 4
-                                        fgColour: circleDel.modelData.charging
-                                            ? Colours.palette.m3tertiary
-                                            : root.batteryColorForLevel(circleDel.modelData.level)
+                                        fgColour: circleDel.modelData.charging ? Colours.palette.m3tertiary : root.batteryColorForLevel(circleDel.modelData.level)
                                         bgColour: Qt.alpha(Colours.palette.m3onSurface, 0.12)
                                     }
 
@@ -145,9 +145,7 @@ StyledRect {
                                         url: BbmService.batteryIconUrl(circleDel.modelData.icon)
                                         visible: url.length > 0
                                         size: 22
-                                        colour: circleDel.modelData.charging
-                                            ? Colours.palette.m3tertiary
-                                            : root.batteryColorForLevel(circleDel.modelData.level)
+                                        colour: circleDel.modelData.charging ? Colours.palette.m3tertiary : root.batteryColorForLevel(circleDel.modelData.level)
                                     }
 
                                     MaterialIcon {
@@ -159,7 +157,10 @@ StyledRect {
 
                                     MaterialIcon {
                                         visible: circleDel.modelData.charging
-                                        anchors { bottom: parent.bottom; horizontalCenter: parent.horizontalCenter }
+                                        anchors {
+                                            bottom: parent.bottom
+                                            horizontalCenter: parent.horizontalCenter
+                                        }
                                         text: "bolt"
                                         color: Colours.palette.m3tertiary
                                         fontStyle: Tokens.font.icon.small
@@ -179,11 +180,8 @@ StyledRect {
 
                 // ── Divider before controls ───────────────────────────────────
                 Rectangle {
-                    readonly property bool hasBatteries: (GlobalConfig.services?.bluetoothHoverShowBatteries ?? true)
-                        && (deviceSection.bbmData !== null || deviceSection.modelData?.batteryAvailable === true)
-                    readonly property bool hasControls: (GlobalConfig.services?.bluetoothHoverShowControls ?? true)
-                        && deviceSection.bbmData !== null
-                        && ((deviceSection.bbmData?.Toggle1Visible ?? false) || (deviceSection.bbmData?.Toggle2Visible ?? false))
+                    readonly property bool hasBatteries: (GlobalConfig.services?.bluetoothHoverShowBatteries ?? true) && (deviceSection.bbmData !== null || deviceSection.modelData?.batteryAvailable === true)
+                    readonly property bool hasControls: (GlobalConfig.services?.bluetoothHoverShowControls ?? true) && deviceSection.bbmData !== null && ((deviceSection.bbmData?.Toggle1Visible ?? false) || (deviceSection.bbmData?.Toggle2Visible ?? false))
                     visible: hasBatteries && hasControls
                     Layout.fillWidth: true
                     height: 1
@@ -192,9 +190,7 @@ StyledRect {
 
                 // ── Toggle rows (Noise Control etc.) ──────────────────────────
                 Repeater {
-                    model: (GlobalConfig.services?.bluetoothHoverShowControls ?? true)
-                        ? BbmService.togglesFor(deviceSection.bbmData)
-                        : []
+                    model: (GlobalConfig.services?.bluetoothHoverShowControls ?? true) ? BbmService.togglesFor(deviceSection.bbmData) : []
 
                     delegate: ColumnLayout {
                         id: toggleGroup
@@ -217,13 +213,13 @@ StyledRect {
 
                             Repeater {
                                 model: toggleGroup.modelData.buttons.map((name, i) => ({
-                                    name,
-                                    icon: (toggleGroup.modelData.buttonIcons ?? [])[i] ?? "",
-                                    active: toggleGroup.modelData.state === (i + 1),
-                                    widgetId: toggleGroup.modelData.widgetId,
-                                    index: i,
-                                    addr: deviceSection.address,
-                                }))
+                                            name,
+                                            icon: (toggleGroup.modelData.buttonIcons ?? [])[i] ?? "",
+                                            active: toggleGroup.modelData.state === (i + 1),
+                                            widgetId: toggleGroup.modelData.widgetId,
+                                            index: i,
+                                            addr: deviceSection.address
+                                        }))
 
                                 delegate: StyledRect {
                                     id: pill
@@ -235,12 +231,12 @@ StyledRect {
                                     Layout.fillWidth: true
                                     implicitHeight: pillIcon.size + Tokens.padding.small * 2
                                     radius: Tokens.rounding.medium
-                                    color: pill.modelData.active
-                                        ? Colours.palette.m3primary
-                                        : Qt.alpha(Colours.palette.m3onSurface, 0.08)
+                                    color: pill.modelData.active ? Colours.palette.m3primary : Qt.alpha(Colours.palette.m3onSurface, 0.08)
 
                                     Behavior on color {
-                                        Anim { type: Anim.DefaultEffects }
+                                        Anim {
+                                            type: Anim.DefaultEffects
+                                        }
                                     }
 
                                     StateLayer {
@@ -275,9 +271,7 @@ StyledRect {
                 Item {
                     id: ancLevelContainer
 
-                    readonly property bool showing: (GlobalConfig.services?.bluetoothHoverShowControls ?? true)
-                        && (deviceSection.bbmData?.OptionsBoxVisible ?? 0) === 1
-                        && (deviceSection.bbmData?.AncLevelButtons ?? []).length > 0
+                    readonly property bool showing: (GlobalConfig.services?.bluetoothHoverShowControls ?? true) && (deviceSection.bbmData?.OptionsBoxVisible ?? 0) === 1 && (deviceSection.bbmData?.AncLevelButtons ?? []).length > 0
 
                     Layout.fillWidth: true
                     implicitHeight: showing ? ancLevelLayout.implicitHeight : 0
@@ -297,11 +291,15 @@ StyledRect {
                         transformOrigin: Item.Top
 
                         Behavior on opacity {
-                            Anim { type: Anim.StandardSmall }
+                            Anim {
+                                type: Anim.StandardSmall
+                            }
                         }
 
                         Behavior on scale {
-                            Anim { type: Anim.StandardSmall }
+                            Anim {
+                                type: Anim.StandardSmall
+                            }
                         }
 
                         StyledText {
@@ -317,11 +315,11 @@ StyledRect {
 
                             Repeater {
                                 model: (deviceSection.bbmData?.AncLevelButtons ?? []).map((name, i) => ({
-                                    name,
-                                    active: (deviceSection.bbmData?.AncLevelState ?? 0) === (i + 1),
-                                    index: i,
-                                    addr: deviceSection.address,
-                                }))
+                                            name,
+                                            active: (deviceSection.bbmData?.AncLevelState ?? 0) === (i + 1),
+                                            index: i,
+                                            addr: deviceSection.address
+                                        }))
 
                                 delegate: StyledRect {
                                     id: levelPill
@@ -331,12 +329,12 @@ StyledRect {
                                     Layout.fillWidth: true
                                     implicitHeight: levelLabel.implicitHeight + Tokens.padding.small * 2
                                     radius: Tokens.rounding.medium
-                                    color: levelPill.modelData.active
-                                        ? Colours.palette.m3secondary
-                                        : Qt.alpha(Colours.palette.m3onSurface, 0.08)
+                                    color: levelPill.modelData.active ? Colours.palette.m3secondary : Qt.alpha(Colours.palette.m3onSurface, 0.08)
 
                                     Behavior on color {
-                                        Anim { type: Anim.DefaultEffects }
+                                        Anim {
+                                            type: Anim.DefaultEffects
+                                        }
                                     }
 
                                     StateLayer {
@@ -360,5 +358,4 @@ StyledRect {
             }
         }
     }
-
 }
