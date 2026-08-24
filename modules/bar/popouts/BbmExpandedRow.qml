@@ -15,6 +15,19 @@ StyledRect {
     required property var bbmData
     required property string address
 
+    function batteryColorForLevel(levelPercent) {
+        const level = Math.max(0, Math.min(100, Number(levelPercent) || 0));
+        const error = Colours.palette.m3error;
+        const tertiary = Colours.palette.m3tertiary;
+        const primary = Colours.palette.m3primary;
+        function lerp(a, b, t) {
+            return Qt.rgba(a.r + (b.r - a.r) * t, a.g + (b.g - a.g) * t, a.b + (b.b - a.b) * t, 1);
+        }
+        if (level <= 15) return error;
+        if (level <= 40) return lerp(error, tertiary, (level - 15) / 25);
+        return lerp(tertiary, primary, (level - 40) / 60);
+    }
+
     Layout.fillWidth: true
     Layout.topMargin: Tokens.spacing.extraSmall
 
@@ -51,11 +64,7 @@ StyledRect {
                 spacing: Tokens.spacing.large
 
                 Repeater {
-                    model: root.bbmData ? [
-                        {icon: root.bbmData.Battery1Icon ?? "", level: root.bbmData.Battery1Level ?? 0, charging: (root.bbmData.Battery1Status ?? "") === "charging"},
-                        {icon: root.bbmData.Battery2Icon ?? "", level: root.bbmData.Battery2Level ?? 0, charging: (root.bbmData.Battery2Status ?? "") === "charging"},
-                        {icon: root.bbmData.Battery3Icon ?? "", level: root.bbmData.Battery3Level ?? 0, charging: (root.bbmData.Battery3Status ?? "") === "charging"},
-                    ].filter(b => b.level > 0) : []
+                    model: BbmService.batteriesFor(root.bbmData)
 
                     delegate: Column {
                         id: circleDel
@@ -73,8 +82,7 @@ StyledRect {
                                 value: circleDel.modelData.level / 100
                                 strokeWidth: 4
                                 fgColour: circleDel.modelData.charging ? Colours.palette.m3tertiary
-                                         : circleDel.modelData.level < 20 ? Colours.palette.m3error
-                                         : Colours.palette.m3primary
+                                         : root.batteryColorForLevel(circleDel.modelData.level)
                                 bgColour: Qt.alpha(Colours.palette.m3onSurface, 0.12)
                             }
 
@@ -84,8 +92,7 @@ StyledRect {
                                 visible: url.length > 0
                                 size: 22
                                 colour: circleDel.modelData.charging ? Colours.palette.m3tertiary
-                                       : circleDel.modelData.level < 20 ? Colours.palette.m3error
-                                       : Colours.palette.m3onSurface
+                                       : root.batteryColorForLevel(circleDel.modelData.level)
                             }
 
                             // Charging bolt badge at bottom of ring
@@ -112,10 +119,7 @@ StyledRect {
         // ── ANC / mode toggle (icon-only segmented control) ───────────────────
 
         Repeater {
-            model: [
-                {title: root.bbmData?.Toggle1Title ?? "", buttons: root.bbmData?.Toggle1Buttons ?? [], buttonIcons: root.bbmData?.Toggle1ButtonIcons ?? [], state: root.bbmData?.Toggle1State ?? 0, visible: root.bbmData?.Toggle1Visible ?? false, widgetId: "toggle1State"},
-                {title: root.bbmData?.Toggle2Title ?? "", buttons: root.bbmData?.Toggle2Buttons ?? [], buttonIcons: root.bbmData?.Toggle2ButtonIcons ?? [], state: root.bbmData?.Toggle2State ?? 0, visible: root.bbmData?.Toggle2Visible ?? false, widgetId: "toggle2State"},
-            ].filter(t => t.visible && t.buttons.length > 0)
+            model: BbmService.togglesFor(root.bbmData)
 
             delegate: ColumnLayout {
                 id: toggleRow
@@ -255,7 +259,7 @@ StyledRect {
                             StateLayer {
                                 radius: Tokens.rounding.medium
                                 color: levelPill.modelData.active ? Colours.palette.m3onSecondary : Colours.palette.m3onSurface
-                                onClicked: BbmService.sendUIAction(root.address, "box1RadioButtonState", levelPill.modelData.index + 1)
+                                onClicked: BbmService.sendUIAction(root.address, BbmService.WIDGET_ANC_LEVEL, levelPill.modelData.index + 1)
                             }
 
                             StyledText {
@@ -272,48 +276,4 @@ StyledRect {
         }
     }
 
-    // ── Theme-aware SVG icon ──────────────────────────────────────────────────
-
-    component BbmIcon: Item {
-        id: iconItem
-
-        required property string url
-        required property color colour
-        property int size: 18
-
-        implicitWidth: size
-        implicitHeight: size
-
-        Image {
-            id: img
-            anchors.fill: parent
-            source: iconItem.url
-            sourceSize: Qt.size(iconItem.size, iconItem.size)
-            fillMode: Image.PreserveAspectFit
-            smooth: true
-            asynchronous: true
-            visible: status !== Image.Error
-
-            layer.enabled: true
-            layer.effect: Colouriser {
-                sourceColor: analyser.dominantColour
-                colorizationColor: iconItem.colour
-            }
-
-            layer.onEnabledChanged: {
-                if (layer.enabled && img.status === Image.Ready)
-                    analyser.requestUpdate();
-            }
-
-            onStatusChanged: {
-                if (layer.enabled && img.status === Image.Ready)
-                    analyser.requestUpdate();
-            }
-        }
-
-        ImageAnalyser {
-            id: analyser
-            sourceItem: img
-        }
-    }
 }

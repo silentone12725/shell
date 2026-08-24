@@ -7,6 +7,7 @@ import Quickshell.Bluetooth
 import Caelestia.Config
 import qs.components
 import qs.components.controls
+import qs.components.effects
 import qs.services
 import qs.utils
 
@@ -23,25 +24,16 @@ ColumnLayout {
     readonly property bool showBatteryRing: Boolean(GlobalConfig.services && GlobalConfig.services.bluetoothBatteryRing)
     readonly property bool swapIconText: Boolean(GlobalConfig.services && GlobalConfig.services.bluetoothBatterySwapIconText)
     function batteryColorForLevel(levelPercent) {
-        const palette = GlobalConfig.services && GlobalConfig.services.bluetoothBatteryUseCustomColors
-            ? (GlobalConfig.services.bluetoothBatteryColors || [])
-            : [
-                "#22c55e",
-                "#22c55e",
-                "#4ade80",
-                "#84cc16",
-                "#facc15",
-                "#f59e0b",
-                "#fb923c",
-                "#f97316",
-                "#f87171",
-                "#ef4444"
-            ];
-        const clamp = Math.max(0, Math.min(100, Number(levelPercent) || 0));
-        if (clamp >= 100)
-            return palette[0] || palette[0] || Colours.palette.m3primary;
-        const idx = Math.min(9, Math.max(0, 9 - Math.floor(clamp / 10)));
-        return palette[idx] || palette[0] || Colours.palette.m3primary;
+        const level = Math.max(0, Math.min(100, Number(levelPercent) || 0));
+        const error = Colours.palette.m3error;
+        const tertiary = Colours.palette.m3tertiary;
+        const primary = Colours.palette.m3primary;
+        function lerp(a, b, t) {
+            return Qt.rgba(a.r + (b.r - a.r) * t, a.g + (b.g - a.g) * t, a.b + (b.b - a.b) * t, 1);
+        }
+        if (level <= 15) return error;
+        if (level <= 40) return lerp(error, tertiary, (level - 15) / 25);
+        return lerp(tertiary, primary, (level - 40) / 60);
     }
 
     width: 320
@@ -101,6 +93,16 @@ ColumnLayout {
 
             required property BluetoothDevice modelData
             readonly property bool loading: modelData.state === BluetoothDeviceState.Connecting || modelData.state === BluetoothDeviceState.Disconnecting // qmllint disable unresolved-type
+            property bool expanded: false
+            // Always expandable when connected — shows battery rings (if available) + icon picker
+            readonly property bool canExpand: modelData.connected
+            readonly property bool hasBatteryData: root.showBatteryRing && (
+                (BbmService.available && BbmService.dataFor(modelData.address) !== null)
+                || modelData.batteryAvailable
+                || (GlobalConfig.services && GlobalConfig.services.bluetoothBatteryUpowerSupport)
+            )
+
+            onCanExpandChanged: if (!canExpand) expanded = false
 
             Layout.fillWidth: true
             Layout.leftMargin: Tokens.padding.extraSmall
@@ -129,21 +131,48 @@ ColumnLayout {
                 Layout.fillWidth: true
                 spacing: Tokens.spacing.small
 
-                MaterialIcon {
-                    visible: true
-                    text: Icons.getBluetoothIcon(device.modelData.icon)
+                // Device type icon (BBM SVG with Material fallback)
+                Item {
+                    id: deviceListIconItem
+
+                    readonly property string bbmUrl: BbmService.deviceIconUrl(device.modelData.address, device.modelData.icon ?? "")
+
+                    implicitWidth: deviceListMat.implicitWidth
+                    implicitHeight: deviceListMat.implicitHeight
+
+                    ColouredIcon {
+                        anchors.centerIn: parent
+                        source: deviceListIconItem.bbmUrl
+                        visible: deviceListIconItem.bbmUrl.length > 0
+                        width: deviceListMat.implicitWidth
+                        height: deviceListMat.implicitHeight
+                        colour: Colours.palette.m3onSurface
+                    }
+
+                    MaterialIcon {
+                        id: deviceListMat
+
+                        anchors.centerIn: parent
+                        visible: deviceListIconItem.bbmUrl.length === 0
+                        // "bluetooth" is used as a size reference when the BBM icon is shown;
+                        // avoids BBM names like "earbuds-stem" inflating implicitWidth via the font
+                        text: deviceListIconItem.bbmUrl.length > 0
+                            ? "bluetooth"
+                            : Icons.getDeviceIcon(device.modelData.address, device.modelData.icon ?? "")
+                    }
                 }
 
                 MaterialIcon {
-                    visible: root.showBatteryIcon && root.swapIconText && device.modelData.state === BluetoothDeviceState.Connected  // qmllint disable unresolved-type
+                    visible: root.showBatteryIcon && root.swapIconText && device.modelData.state === BluetoothDeviceState.Connected // qmllint disable unresolved-type
                     text: device.modelData.batteryAvailable ? Icons.getBatteryIcon(device.modelData.battery) : "battery_alert"
                     color: device.modelData.batteryAvailable
                         ? root.batteryColorForLevel(device.modelData.battery * 100)
                         : Colours.palette.m3error
+                    fontStyle: Tokens.font.icon.small
                 }
 
                 StyledText {
-                    visible: root.showBatteryText && root.swapIconText && device.modelData.state === BluetoothDeviceState.Connected  // qmllint disable unresolved-type
+                    visible: root.showBatteryText && root.swapIconText && device.modelData.state === BluetoothDeviceState.Connected // qmllint disable unresolved-type
                     text: device.modelData.batteryAvailable ? Math.round(device.modelData.battery * 100) + "%" : "--%"
                     color: device.modelData.batteryAvailable
                         ? root.batteryColorForLevel(device.modelData.battery * 100)
@@ -151,16 +180,32 @@ ColumnLayout {
                     font: Tokens.font.body.small
                 }
 
-                StyledText {
-                    Layout.leftMargin: Tokens.spacing.extraSmall
-                    Layout.rightMargin: Tokens.spacing.extraSmall
+                Item {
                     Layout.fillWidth: true
-                    text: device.modelData.name
-                    elide: Text.ElideRight
+                    implicitHeight: deviceName.implicitHeight + Tokens.padding.extraSmall
+
+                    StateLayer {
+                        enabled: device.canExpand
+                        radius: Tokens.rounding.small
+                        onClicked: device.expanded = !device.expanded
+                    }
+
+                    StyledText {
+                        id: deviceName
+                        anchors {
+                            left: parent.left
+                            right: parent.right
+                            verticalCenter: parent.verticalCenter
+                            leftMargin: Tokens.spacing.extraSmall
+                            rightMargin: Tokens.spacing.extraSmall
+                        }
+                        text: device.modelData.name
+                        elide: Text.ElideRight
+                    }
                 }
 
                 StyledText {
-                    visible: root.showBatteryText && !root.swapIconText && device.modelData.state === BluetoothDeviceState.Connected  // qmllint disable unresolved-type
+                    visible: root.showBatteryText && !root.swapIconText && device.modelData.state === BluetoothDeviceState.Connected // qmllint disable unresolved-type
                     text: device.modelData.batteryAvailable ? Math.round(device.modelData.battery * 100) + "%" : "--%"
                     color: device.modelData.batteryAvailable
                         ? root.batteryColorForLevel(device.modelData.battery * 100)
@@ -169,13 +214,15 @@ ColumnLayout {
                 }
 
                 MaterialIcon {
-                    visible: root.showBatteryIcon && !root.swapIconText && device.modelData.state === BluetoothDeviceState.Connected  // qmllint disable unresolved-type
+                    visible: root.showBatteryIcon && !root.swapIconText && device.modelData.state === BluetoothDeviceState.Connected // qmllint disable unresolved-type
                     text: device.modelData.batteryAvailable ? Icons.getBatteryIcon(device.modelData.battery) : "battery_alert"
                     color: device.modelData.batteryAvailable
                         ? root.batteryColorForLevel(device.modelData.battery * 100)
                         : Colours.palette.m3error
+                    fontStyle: Tokens.font.icon.small
                 }
 
+                // Connect / disconnect button
                 StyledRect {
                     id: connectBtn
 
@@ -214,6 +261,7 @@ ColumnLayout {
                     }
                 }
 
+                // Forget button
                 Loader {
                     visible: status === Loader.Ready
                     asynchronous: true
@@ -237,17 +285,14 @@ ColumnLayout {
 
             Loader {
                 visible: status === Loader.Ready
-                active: root.showBatteryRing && device.modelData.connected && (
-                    (BbmService.available && BbmService.dataFor(device.modelData.address) !== null)
-                    || (GlobalConfig.services && GlobalConfig.services.bluetoothBatteryUpowerSupport && device.modelData.batteryAvailable)
-                )
+                active: device.expanded && device.hasBatteryData
                 Layout.fillWidth: true
                 sourceComponent: BbmExpandedRow {
                     bbmData: {
                         const bbm = BbmService.available ? BbmService.dataFor(device.modelData.address) : null;
                         if (bbm)
                             return bbm;
-                        if (GlobalConfig.services && GlobalConfig.services.bluetoothBatteryUpowerSupport && device.modelData.batteryAvailable) {
+                        if (device.modelData.batteryAvailable) {
                             return {
                                 Battery1Level: Math.round(device.modelData.battery * 100),
                                 Battery1Icon: "",
@@ -261,6 +306,7 @@ ColumnLayout {
                     address: device.modelData.address
                 }
             }
+
         }
     }
 
